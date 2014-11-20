@@ -37,6 +37,7 @@
 			characNum:0,
 			direct:2,
 			predirect:2,
+			item:1,
 			x:384,
 			y:192
 		}]
@@ -44,21 +45,25 @@
 			{
 			life:false,
 			enemyNum:0,
+			hp:1,
 			tile_x:5,
 			tile_y:2},
 			{
 			life:false,
 			enemyNum:1,
+			hp:2,
 			tile_x:4,
 			tile_y:2},
 			{
 			life:false,
 			enemyNum:2,
+			hp:3,
 			tile_x:3,
 			tile_y:2},
 			{
 			life:false,
 			enemyNum:3,
+			hp:4,
 			tile_x:2,
 			tile_y:2}
 		]
@@ -103,8 +108,10 @@
 		var enemyBitmap2 = new Array();
 		var enemyBitmap3 = new Array();
 		var enemyBitmap4 = new Array();
+		var attackBitmap = new Array();
 		var background = new Image();
 		var ballBitmap = new Image();
+		var swordBitmap = new Image();
 		
 		
 		//onLoad
@@ -129,9 +136,13 @@
 			for(i = 0; i < 4 ; i++){
 				backBitmap[i] = new Image();
 			}
+			for(i = 0; i < 5 ; i++){
+				attackBitmap[i] = new Image();
+			}
 
 			background.src="image/ui/map.png"
 			ballBitmap.src="image/ui/momo_button.png"
+			swordBitmap.src="image/ui/item_sword1.png"
 
 			characBitmap0[0].src="image/character/ch06_b1.png"
 			characBitmap0[1].src="image/character/ch06_b2.png"
@@ -189,6 +200,12 @@
 			enemyBitmap3[1].src="image/enemy/en03_f2.png"
 			enemyBitmap4[0].src="image/enemy/en04_f1.png"
 			enemyBitmap4[1].src="image/enemy/en04_f2.png"
+
+			attackBitmap[0].src="image/ui/attack_swing1.png"
+			attackBitmap[1].src="image/ui/attack_swing2.png"
+			attackBitmap[2].src="image/ui/attack_swing3.png"
+			attackBitmap[3].src="image/ui/attack_swing4.png"
+			attackBitmap[4].src="image/ui/attack_swing5.png"
 			
 			/*
 			tileBitmap[0].src="image/tile/tile1.png"

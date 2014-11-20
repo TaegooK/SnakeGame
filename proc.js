@@ -18,7 +18,9 @@ function timeProc(){
 			createEnemy();
 			enemyCount = 0;
 		}
-		//alert("ddddd");
+
+		//crash
+		if(check_crash < 2)check_crash++;
 	}
 
 	//speed pixels to speed pixels
@@ -51,7 +53,7 @@ function timeProc(){
 	}
 
 	//crash
-	crashEnemy();
+	if(check_crash == 2)crashEnemy();
 
 	//ball
 	crashBall();
@@ -60,6 +62,7 @@ function timeProc(){
 
 	//count
 	if(crashedCount > 0)crashedCount--;
+	if(attackCount > 0)attackCount--;
 }
 function draw(){
 	var canvas = document.getElementById('canvas1');
@@ -91,6 +94,19 @@ function draw(){
 	
 	//ball
 	for(var i = 0 ; i < 3 ; i++)content.drawImage(ballBitmap, ball[i].tile_x*tile_w + margin_x,ball[i].tile_y*tile_w + margin_y);
+
+	//item
+	//sword
+	for(var i = character.length-1 ; i >= 0  ; i--){
+		if(character[i].item == 1)content.drawImage(swordBitmap, character[i].x + tile_w/4 + margin_x,character[i].y - tile_w/2 + margin_y);
+	}
+
+	//effect
+	//sword
+	if(attackCount > 0){
+		var num = parseInt(attackCount/frame_speed);
+		content.drawImage(attackBitmap[4 - num], effect_tile_x*tile_w + margin_x,effect_tile_y*tile_w + margin_y);
+	}
 
 	content.restore();
 }
@@ -141,6 +157,15 @@ function handleKeyDown(e){
 			key_down = true;
 			preDirect = 2;
 		break;
+		case 32: // space bar // change
+			changeCharac();
+		break;
+		case 16: // shift
+		break;
+		case 17: // ctrl
+		break;
+		case 27: // esc
+		break;
 		case 13:
 			toggleFullScreen();
 		break;
@@ -170,13 +195,14 @@ function createEnemy(){
 	for(var i = 0 ; i < 4 ; i++){		
 		if(enemy[i].life == false){	
 			enemy[i].life = true;
-			enemy[i].tile_x = Math.floor((Math.random() * 6) + 0);
-			enemy[i].tile_y = Math.floor((Math.random() * 9) + 0);
+			enemy[i].tile_x = Math.floor((Math.random() * 7) + 0);
+			enemy[i].tile_y = Math.floor((Math.random() * 10) + 0);
 			while(checkWhatInCurrentPosition(enemy[i].tile_x, enemy[i].tile_y, 2, i)){
-				enemy[i].tile_x = Math.floor((Math.random() * 6) + 0);
-				enemy[i].tile_y = Math.floor((Math.random() * 9) + 0);
+				enemy[i].tile_x = Math.floor((Math.random() * 7) + 0);
+				enemy[i].tile_y = Math.floor((Math.random() * 10) + 0);
 			}
-			enemy[i].enemyNum = Math.floor((Math.random() * 4) + 0);
+			enemy[i].enemyNum = Math.floor((Math.random() * 5) + 0);
+			enemy[i].hp = enemy[i].enemyNum+1;
 			//alert("num: " + enemy[i].enemyNum + " x: " + enemy[i].tile_x + " y: " + enemy[i].tile_y);
 			break;			
 		}
@@ -188,15 +214,39 @@ function createEnemy(){
 var crashedCount = 0;
 var hp_max = 5;
 var hp = hp_max;
+var check_crash = 2;
+var attackCount = 0;
+var effect_tile_x = -10;
+var effect_tile_y = -10;
+var frame_speed = 3;
 function crashEnemy()
 {
 	for(var i = 0 ; i < 4 ; i++){		
 		if(enemy[i].life == true){			
 			if(Math.abs(character[0].x - enemy[i].tile_x*tile_w) < tile_w && Math.abs(character[0].y - enemy[i].tile_y*tile_w) < tile_w){	
-				minusHP();
+				check_crash = 0; // once
+
+				if(character[0].item == 1){
+					attackEnemy(i);
+				}else {
+					minusHP();
+				}				
 				break;	
 			}					
 		}		
+	}
+}
+
+function attackEnemy(enemyNum)
+{
+	attackCount = 5 * frame_speed - 1;
+	enemy[enemyNum].hp -= 2;
+	character[0].item = 0;
+	effect_tile_x = enemy[enemyNum].tile_x;
+	effect_tile_y = enemy[enemyNum].tile_y;
+	if(enemy[enemyNum].hp <= 0){
+		//die
+		enemy[enemyNum].life = false;
 	}
 }
 
@@ -216,18 +266,18 @@ function minusHP()
 function createBall(){
 	for(var i = 0 ; i < 3 ; i++){	
 		//alert("wile 전에 경고창 i: " + i);			
-		ball[i].tile_x = Math.floor((Math.random() * 6) + 0);
-		ball[i].tile_y = Math.floor((Math.random() * 9) + 0);
+		ball[i].tile_x = Math.floor((Math.random() * 7) + 0);
+		ball[i].tile_y = Math.floor((Math.random() * 10) + 0);
 		
 		//alert("wile 전에 경고창 flag: " + flag);	
 		while(checkWhatInCurrentPosition(ball[i].tile_x, ball[i].tile_y, 1, i)){
 			//alert("wile 시작 ");
-			ball[i].tile_x = Math.floor((Math.random() * 6) + 0);
-			ball[i].tile_y = Math.floor((Math.random() * 9) + 0);
+			ball[i].tile_x = Math.floor((Math.random() * 7) + 0);
+			ball[i].tile_y = Math.floor((Math.random() * 10) + 0);
 		}
 
 		//alert("end-while");
-		ball[i].whatCharac = Math.floor((Math.random() * 4) + 0);
+		ball[i].whatCharac = Math.floor((Math.random() * 5) + 0);
 		ball[i].whatItem = 1;
 	}
 	
@@ -239,6 +289,9 @@ function crashBall()
 {
 	for(var i = 0 ; i < 3 ; i++){				
 		if(Math.abs(character[0].x - ball[i].tile_x*tile_w) < tile_w && Math.abs(character[0].y - ball[i].tile_y*tile_w) < tile_w){
+			
+			//check_crash = 0; // once
+
 			//create ball
 			createBall();
 
@@ -254,10 +307,18 @@ function crashBall()
 			}else if(character[character.length-1].direct == 2){ //down
 				mini_y -= tile_w;	
 			}
-			character.push({characNum:ball[i].whatCharac, direct:character[character.length-1].direct, x:mini_x, y:mini_y});
+			var defultItem = 0;
+			if(ball[i].whatCharac == 0 || ball[i].whatCharac == 2 || ball[i].whatCharac == 3)defultItem = 1;
+			character.push({characNum:ball[i].whatCharac, direct:character[character.length-1].direct, x:mini_x, y:mini_y, item:defultItem});
 			
 			//get item
-
+			var item = Math.floor((Math.random() * 6) + 0);
+			if(item == 0){ // nothing
+			}else if(item == 1){ // half
+				character.splice(parseInt(character.length/2), character.length - parseInt(character.length/2));
+			}else { // sword
+				character[0].item = 1;
+			}
 		}							
 	}
 }
@@ -301,6 +362,24 @@ function checkWhatInCurrentPosition(tile_x, tile_y, what_, number)
 	if(parseInt(character[0].x/tile_w) == tile_x && parseInt(character[0].y/tile_w) == tile_y)return true;
 	return false; // nothing
 }
+
+
+
+
+
+function changeCharac()
+{
+	var temp_characNum = character[0].characNum;
+	var temp_item = character[0].item;
+	for(var i = 1; i < character.length ; i++){
+		character[i-1].characNum = character[i].characNum;
+		character[i-1].item = character[i].item;
+	}
+	character[character.length - 1].characNum = temp_characNum;
+	character[character.length - 1].item = temp_item;
+}
+
+
 
 
 
