@@ -1,0 +1,277 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+ <head>
+	<title> New Document </title>
+	<meta charset="utf-8">
+	<style>
+		body{overflow:hidden; margin:0px; background-color:black}
+	</style>
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="proc.js"></script>
+	<script>	
+		var rate=1;
+		var width=720;
+		var height=1280;
+		var key_left = false;
+		var key_right = false;
+		var key_up = false;
+		var key_down = false;
+		var count = 0;
+		var touch_x = 0;
+		var touch_y = 0;
+		var touch_after_x = 0;
+		var touch_after_y = 0;
+		var tile_w = 96;
+		var margin_x= (width - (tile_w*7))/2;
+		var margin_y= 55;
+		var speed = 4;
+		var map_max_x = 7;
+		var map_max_y = 10;
+		var preDirect = 2;
+		//enemy
+		var enemy_num_max = 10;
+		var enemy_num = 0;
+		var enemyCount = 0;
+
+		var character = [{
+			characNum:0,
+			direct:2,
+			predirect:2,
+			x:384,
+			y:192
+		}]
+		var enemy = [
+			{
+			life:false,
+			enemyNum:0,
+			tile_x:5,
+			tile_y:2},
+			{
+			life:false,
+			enemyNum:1,
+			tile_x:4,
+			tile_y:2},
+			{
+			life:false,
+			enemyNum:2,
+			tile_x:3,
+			tile_y:2},
+			{
+			life:false,
+			enemyNum:3,
+			tile_x:2,
+			tile_y:2}
+		]
+		var ball = [
+			{
+			whatCharac:0,
+			whatItem:0,
+			tile_x:5,
+			tile_y:7},
+			{
+			whatCharac:0,
+			whatItem:0,
+			tile_x:1,
+			tile_y:2},
+			{
+			whatCharac:0,
+			whatItem:0,
+			tile_x:3,
+			tile_y:6}
+		]
+
+		var map = [ 0,1,3,2,0,0,1,
+					5,3,1,1,0,2,0,
+					2,1,3,0,0,0,2,
+					0,1,3,2,0,0,1,
+					5,3,1,1,0,2,0,
+					2,1,3,0,0,0,2,
+					0,1,3,2,0,0,1,
+					5,3,1,1,0,2,0,
+					2,1,3,0,0,0,2,
+					0,1,3,2,0,0,1];
+
+		var characBitmap0 = new Array();
+		var characBitmap1 = new Array();
+		var characBitmap2 = new Array();
+		var characBitmap3 = new Array();
+		var characBitmap4 = new Array();
+		var tileBitmap = new Array();
+		var backBitmap = new Array();
+		var enemyBitmap0 = new Array();
+		var enemyBitmap1 = new Array();
+		var enemyBitmap2 = new Array();
+		var enemyBitmap3 = new Array();
+		var enemyBitmap4 = new Array();
+		var background = new Image();
+		var ballBitmap = new Image();
+		
+		
+		//onLoad
+		$(document).ready(function(){			
+			for(i = 0; i < 8 ; i++){
+				characBitmap0[i] = new Image();
+				characBitmap1[i] = new Image();
+				characBitmap2[i] = new Image();
+				characBitmap3[i] = new Image();
+				characBitmap4[i] = new Image();
+			}
+			for(i = 0; i < 2 ; i++){
+				enemyBitmap0[i] = new Image();
+				enemyBitmap1[i] = new Image();
+				enemyBitmap2[i] = new Image();
+				enemyBitmap3[i] = new Image();
+				enemyBitmap4[i] = new Image();
+			}
+			for(i = 0; i < 6 ; i++){
+				tileBitmap[i] = new Image();
+			}
+			for(i = 0; i < 4 ; i++){
+				backBitmap[i] = new Image();
+			}
+
+			background.src="image/ui/map.png"
+			ballBitmap.src="image/ui/momo_button.png"
+
+			characBitmap0[0].src="image/character/ch06_b1.png"
+			characBitmap0[1].src="image/character/ch06_b2.png"
+			characBitmap0[2].src="image/character/ch06_f1.png"
+			characBitmap0[3].src="image/character/ch06_f2.png"
+			characBitmap0[4].src="image/character/ch06_l1.png"
+			characBitmap0[5].src="image/character/ch06_l2.png"
+			characBitmap0[6].src="image/character/ch06_r1.png"
+			characBitmap0[7].src="image/character/ch06_r2.png"
+
+			characBitmap1[0].src="image/character/ch07_b1.png"
+			characBitmap1[1].src="image/character/ch07_b2.png"
+			characBitmap1[2].src="image/character/ch07_f1.png"
+			characBitmap1[3].src="image/character/ch07_f2.png"
+			characBitmap1[4].src="image/character/ch07_l1.png"
+			characBitmap1[5].src="image/character/ch07_l2.png"
+			characBitmap1[6].src="image/character/ch07_r1.png"
+			characBitmap1[7].src="image/character/ch07_r2.png"
+
+			characBitmap2[0].src="image/character/ch08_b1.png"
+			characBitmap2[1].src="image/character/ch08_b2.png"
+			characBitmap2[2].src="image/character/ch08_f1.png"
+			characBitmap2[3].src="image/character/ch08_f2.png"
+			characBitmap2[4].src="image/character/ch08_l1.png"
+			characBitmap2[5].src="image/character/ch08_l2.png"
+			characBitmap2[6].src="image/character/ch08_r1.png"
+			characBitmap2[7].src="image/character/ch08_r2.png"
+
+			characBitmap3[0].src="image/character/ch09_b1.png"
+			characBitmap3[1].src="image/character/ch09_b2.png"
+			characBitmap3[2].src="image/character/ch09_f1.png"
+			characBitmap3[3].src="image/character/ch09_f2.png"
+			characBitmap3[4].src="image/character/ch09_l1.png"
+			characBitmap3[5].src="image/character/ch09_l2.png"
+			characBitmap3[6].src="image/character/ch09_r1.png"
+			characBitmap3[7].src="image/character/ch09_r2.png"
+
+			characBitmap4[0].src="image/character/ch10_b1.png"
+			characBitmap4[1].src="image/character/ch10_b2.png"
+			characBitmap4[2].src="image/character/ch10_f1.png"
+			characBitmap4[3].src="image/character/ch10_f2.png"
+			characBitmap4[4].src="image/character/ch10_l1.png"
+			characBitmap4[5].src="image/character/ch10_l2.png"
+			characBitmap4[6].src="image/character/ch10_r1.png"
+			characBitmap4[7].src="image/character/ch10_r2.png"
+
+
+			enemyBitmap0[0].src="image/enemy/en00_f1.png"
+			enemyBitmap0[1].src="image/enemy/en00_f2.png"
+			enemyBitmap1[0].src="image/enemy/en01_f1.png"
+			enemyBitmap1[1].src="image/enemy/en01_f2.png"
+			enemyBitmap2[0].src="image/enemy/en02_f1.png"
+			enemyBitmap2[1].src="image/enemy/en02_f2.png"
+			enemyBitmap3[0].src="image/enemy/en03_f1.png"
+			enemyBitmap3[1].src="image/enemy/en03_f2.png"
+			enemyBitmap4[0].src="image/enemy/en04_f1.png"
+			enemyBitmap4[1].src="image/enemy/en04_f2.png"
+			
+			/*
+			tileBitmap[0].src="image/tile/tile1.png"
+			tileBitmap[1].src="image/tile/tile2.png"
+			tileBitmap[2].src="image/tile/tile3.png"
+			tileBitmap[3].src="image/tile/tile4.png"
+			tileBitmap[4].src="image/tile/tile5.png"
+			tileBitmap[5].src="image/tile/tile6.png"
+
+			backBitmap[0].src="image/ui/bg_left.png"
+			backBitmap[1].src="image/ui/bg_right.png"
+			backBitmap[2].src="image/ui/bg_top.png"
+			backBitmap[3].src="image/ui/bg_bottom.png"
+			*/
+			window.addEventListener("keydown",handleKeyDown);
+			window.addEventListener("keyup",handleKeyUp);
+
+			//toggleFullScreen();
+
+			//var del = confirm('��ü ȭ������ ��ȯ�ϰڽ��ϱ�?');
+			//if(del == true)toggleFullScreen();
+
+
+			//if(window.innerWidth < window.innerHeight)rate = window.innerWidth/720; // smart phone
+			//else {
+				margin_x = 70;
+				rate = window.innerHeight/1280; // pc
+			//}
+			setInterval(timeProc,16);
+			var touchzone = document.getElementById("canvas1");
+			touchzone.addEventListener("touchstart", handleKeyDrag, false);
+			touchzone.addEventListener("touchmove", handleKeyDragMove, false);
+			touchzone.addEventListener("touchend", handleKeyDragUp, false);
+		});
+
+	function whatCharac(num, frame){
+		if(num == 0)return characBitmap0[frame];
+		if(num == 1)return characBitmap1[frame];
+		if(num == 2)return characBitmap2[frame];
+		if(num == 3)return characBitmap3[frame];
+		if(num == 4)return characBitmap4[frame];
+	}
+
+	function whatEnemy(num, frame){
+		if(num == 0)return enemyBitmap0[frame];
+		if(num == 1)return enemyBitmap1[frame];
+		if(num == 2)return enemyBitmap2[frame];
+		if(num == 3)return enemyBitmap3[frame];
+		if(num == 4)return enemyBitmap4[frame];
+	}
+
+
+	function toggleFullScreen() {
+		if (!document.fullscreenElement &&    // alternative standard method
+		!document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+			if (document.documentElement.requestFullscreen) {
+				document.documentElement.requestFullscreen();
+			} else if (document.documentElement.msRequestFullscreen) {
+				document.documentElement.msRequestFullscreen();
+			} else if (document.documentElement.mozRequestFullScreen) {
+				document.documentElement.mozRequestFullScreen();
+			} else if (document.documentElement.webkitRequestFullscreen) {
+				document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+			}
+		} else {
+			if (document.exitFullscreen) {
+				document.exitFullscreen();
+			} else if (document.msExitFullscreen) {
+				document.msExitFullscreen();
+			} else if (document.mozCancelFullScreen) {
+				document.mozCancelFullScreen();
+			} else if (document.webkitExitFullscreen) {
+				document.webkitExitFullscreen();
+			}
+		}
+	}
+/* style="border: 1px solid #ccc"></canvas>*/
+	</script>
+	
+
+ </head>
+
+ <body>
+	<canvas id="canvas1" width = "1080" height="1920"></canvas>
+ </body>
+</html>
