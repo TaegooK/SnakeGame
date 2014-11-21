@@ -4,6 +4,17 @@ function timeProc(){
 		character[0].x >= 0 && character[0].x <= map_max_x*tile_w &&
 		character[0].y >= 0 && character[0].y <= map_max_y*tile_w){
 
+		//change direction
+		if(character[0].direct == 4){ // left
+			if(preDirect == 6 && character.length > 1)preDirect = 4;
+		}else if(character[0].direct == 6){ //right
+			if(preDirect == 4 && character.length > 1)preDirect = 6;
+		}else if(character[0].direct == 0){ //up
+			if(preDirect == 2 && character.length > 1)preDirect = 0;
+		}else if(character[0].direct == 2){ //down
+			if(preDirect == 0 && character.length > 1)preDirect = 2;
+		}
+
 		for(var i = 0 ; i < character.length ; i++){
 			character[i].predirect = character[i].direct;				
 		}
@@ -18,6 +29,39 @@ function timeProc(){
 			createEnemy();
 			enemyCount = 0;
 		}
+
+		//existed somthing in front of character
+		var check_x = character[0].x;
+		var check_y = character[0].y;
+		
+		if(character[0].direct == 4){ // left
+			check_x -= tile_w;
+			if(check_x < 0){
+				check_x = (map_max_x-1)*tile_w;
+			}
+		}else if(character[0].direct == 6){ //right
+			check_x += tile_w;
+			if(check_x > (map_max_x-1)*tile_w){
+				check_x = 0;
+			}
+		}else if(character[0].direct == 0){ //up
+			check_y -= tile_w;
+			if(check_y < 0){
+				check_y = (map_max_y-1)*tile_w;
+			}
+		}else if(character[0].direct == 2){ //down
+			check_y += tile_w;
+			if(check_y > (map_max_y-1)*tile_w){
+				check_y = 0;
+			}
+		}
+		//crash enemy
+		crashEnemy(check_x, check_y);
+		//crash ball
+		crashBall(check_x, check_y);
+		//crash charac
+		crashCharacter(check_x, check_y);
+
 
 		//crash
 		if(check_crash < 2)check_crash++;
@@ -52,11 +96,8 @@ function timeProc(){
 		}
 	}
 
-	//crash
-	if(check_crash == 2)crashEnemy();
 
-	//ball
-	crashBall();
+	
 	
 	draw();
 
@@ -219,13 +260,11 @@ var attackCount = 0;
 var effect_tile_x = -10;
 var effect_tile_y = -10;
 var frame_speed = 3;
-function crashEnemy()
+function crashEnemy(pos_x, pos_y)
 {
 	for(var i = 0 ; i < 4 ; i++){		
 		if(enemy[i].life == true){			
-			if(Math.abs(character[0].x - enemy[i].tile_x*tile_w) < tile_w && Math.abs(character[0].y - enemy[i].tile_y*tile_w) < tile_w){	
-				check_crash = 0; // once
-
+			if(pos_x == enemy[i].tile_x*tile_w && pos_y == enemy[i].tile_y*tile_w){	
 				if(character[0].item == 1){
 					attackEnemy(i);
 				}else {
@@ -285,13 +324,10 @@ function createBall(){
 }
 
 
-function crashBall()
+function crashBall(pos_x, pos_y)
 {
 	for(var i = 0 ; i < 3 ; i++){				
-		if(Math.abs(character[0].x - ball[i].tile_x*tile_w) < tile_w && Math.abs(character[0].y - ball[i].tile_y*tile_w) < tile_w){
-			
-			//check_crash = 0; // once
-
+		if(pos_x == ball[i].tile_x*tile_w && pos_y == ball[i].tile_y*tile_w){
 			//create ball
 			createBall();
 
@@ -361,6 +397,17 @@ function checkWhatInCurrentPosition(tile_x, tile_y, what_, number)
 
 	if(parseInt(character[0].x/tile_w) == tile_x && parseInt(character[0].y/tile_w) == tile_y)return true;
 	return false; // nothing
+}
+
+
+
+function crashCharacter(pos_x, pos_y)
+{
+	for(var i = 1; i < character.length ; i++){
+		if(pos_x == character[i].x && pos_y == character[i].y){
+			minusHP();
+		}
+	}
 }
 
 
