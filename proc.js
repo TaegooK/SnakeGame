@@ -1,9 +1,29 @@
 function timeProc(){
+	if(gameState == 0)timeProcTitle();
+	else if(gameState == 1)timeProcBattle(); // game start
+}
+
+function timeProcTitle(){
+	drawTitle();
+}
+
+function drawTitle(){
+	var canvas = document.getElementById('canvas1');
+	var content = canvas.getContext("2d");
+	content.save();
+	content.scale(rate,rate);
+	content.drawImage(tilteBitmap,margin_x - 70,0);
+	content.restore();
+}
+
+
+function timeProcBattle(){
+	if(forReady < 58)return;
 	//tile to tile
 	if(character[0].x % tile_w == 0 && character[0].y % tile_w == 0 &&
 		character[0].x >= 0 && character[0].x <= map_max_x*tile_w &&
 		character[0].y >= 0 && character[0].y <= map_max_y*tile_w){
-
+		//alert("" + forReady);
 		//change direction
 		if(character[0].direct == 4){ // left
 			if(preDirect == 6 && character.length > 1)preDirect = 4;
@@ -26,7 +46,7 @@ function timeProc(){
 				
 		enemyCount++;
 		if(enemyCount == 10){
-			createEnemy();
+			if(skill2Count == 0)createEnemy();
 			enemyCount = 0;
 		}
 
@@ -104,7 +124,14 @@ function timeProc(){
 	//count
 	if(crashedCount > 0)crashedCount--;
 	if(attackCount > 0)attackCount--;
+	if(windCount > 0)windCount--;
+	if(skill2Count > 0)skill2Count--;
+	if(shakeCount > 0){
+		shakeCount--;
+	}else shake = 0;
 }
+
+
 function draw(){
 	var canvas = document.getElementById('canvas1');
 	var content = canvas.getContext("2d");
@@ -112,7 +139,11 @@ function draw(){
 	content.scale(rate,rate);
 	
 	//background
-	content.drawImage(background,margin_x - 70,0);
+	if(shakeCount > 0){
+		var shake_frame = parseInt(shakeCount/frame_speed);
+		if(shake_frame % 2)	shake = shake * -1;
+	}
+	content.drawImage(background,margin_x - 70 + shake,0 + shake);
 	if(crashedCount == (tile_w / speed)*2 || crashedCount == (tile_w / speed)*2 - 6){
 		content.fillStyle="#FF0000";
 		content.fillRect(0,0,background.width,height);
@@ -128,6 +159,34 @@ function draw(){
 			//content.drawImage(whatCharac(character[0].characNum, frameCount + character[0].direct),(character[0].x+tile_w) + margin_x,character[0].y+tile_w + margin_y);
 		content.drawImage(whatEnemy(enemy[i].enemyNum, frameCount),enemy[i].tile_x*tile_w + margin_x,enemy[i].tile_y*tile_w + margin_y);
 	}
+
+	//effect
+	//sword
+	if(attackCount > 0){
+		var num = parseInt(attackCount/frame_speed);
+		content.drawImage(attackBitmap[4 - num], effect_tile_x*tile_w + margin_x,effect_tile_y*tile_w + margin_y);
+	}
+	if(skill2Count > 0){
+		var num = parseInt(skill2Count/frame_speed);
+		if(character[0].characNum == 0){
+			for(var i = 0 ; i < 4 ; i++){
+				if(enemy[i].life == true){
+					content.drawImage(thunderBitmap[num%3], enemy[i].tile_x*tile_w + margin_x,(enemy[i].tile_y-10)*tile_w + 30 + margin_y);
+				
+					if(windCount > 0){
+					var num = parseInt(windCount/frame_speed);
+					content.drawImage(windBitmap[num], (enemy[i].tile_x-1)*tile_w + margin_x,enemy[i].tile_y*tile_w + margin_y);
+	}
+				}
+			}
+		}
+	}
+	if(windCount > 0){
+		var num = parseInt(windCount/frame_speed);
+		content.drawImage(windBitmap[num], (effect_tile_x-1)*tile_w + margin_x,effect_tile_y*tile_w + margin_y);
+	}
+
+
 	//character
 	for(var i = character.length-1 ; i >= 0  ; i--){
 		content.drawImage(whatCharac(character[i].characNum, frameCount + character[i].direct),character[i].x + margin_x,character[i].y + margin_y);
@@ -142,12 +201,7 @@ function draw(){
 		if(character[i].item == 1)content.drawImage(swordBitmap, character[i].x + tile_w/4 + margin_x,character[i].y - tile_w/2 + margin_y);
 	}
 
-	//effect
-	//sword
-	if(attackCount > 0){
-		var num = parseInt(attackCount/frame_speed);
-		content.drawImage(attackBitmap[4 - num], effect_tile_x*tile_w + margin_x,effect_tile_y*tile_w + margin_y);
-	}
+	
 
 	content.restore();
 }
@@ -165,6 +219,8 @@ function handleKeyDragMove(event){
 }
 
 function handleKeyDragUp(event){
+	changeState();
+
 	if (event.touches.length < 2)event.preventDefault();
 	var absX = Math.abs(touch_x - touch_after_x);
 	var absY = Math.abs(touch_y - touch_after_y);
@@ -204,8 +260,17 @@ function handleKeyDown(e){
 		case 16: // shift
 		break;
 		case 17: // ctrl
+			if(character[0].characNum == 0 && skill2Count == 0){
+				//번개 쏘는 주인공
+				windCount = 8 * frame_speed - 1;
+				skill2Count = shakeCount = 9 * frame_speed - 1;
+				effect_tile_x = -10;
+				effect_tile_y = -10;
+				shake = 8;
+			}
 		break;
 		case 27: // esc
+			aud_play_pause();
 		break;
 		case 13:
 			toggleFullScreen();
@@ -213,6 +278,9 @@ function handleKeyDown(e){
 	}
 }
 function handleKeyUp(e){
+	changeState();
+		
+
 	switch(e.keyCode){
 		case 37: 
 			key_left = false;
@@ -229,7 +297,16 @@ function handleKeyUp(e){
 	}
 }
 
-
+function changeState()
+{
+	if(gameState == 0){
+		gameState = 1;
+		var myAudio = document.getElementById("bgm"); 
+		myAudio.pause();
+		myAudio.src = "music/battle1.ogg";
+		myAudio.play();
+	}
+}
 
 
 function createEnemy(){
@@ -252,20 +329,25 @@ function createEnemy(){
 }
 
 
-var crashedCount = 0;
 var hp_max = 5;
 var hp = hp_max;
+var crashedCount = 0;
 var check_crash = 2;
 var attackCount = 0;
+var skill2Count = 0;
+var shakeCount = 0;
+var windCount = 0;
 var effect_tile_x = -10;
 var effect_tile_y = -10;
 var frame_speed = 3;
+var shake = 0;
 function crashEnemy(pos_x, pos_y)
 {
 	for(var i = 0 ; i < 4 ; i++){		
 		if(enemy[i].life == true){			
 			if(pos_x == enemy[i].tile_x*tile_w && pos_y == enemy[i].tile_y*tile_w){	
 				if(character[0].item == 1){
+					effect_sound("effect_1", "music/knife_1.wav");
 					attackEnemy(i);
 				}else {
 					minusHP();
@@ -285,6 +367,7 @@ function attackEnemy(enemyNum)
 	effect_tile_y = enemy[enemyNum].tile_y;
 	if(enemy[enemyNum].hp <= 0){
 		//die
+		windCount = 8 * frame_speed - 1;
 		enemy[enemyNum].life = false;
 	}
 }
@@ -293,6 +376,7 @@ function minusHP()
 {
 	if(crashedCount == 0){
 		crashedCount = (tile_w / speed)*2; // 24
+		effect_sound("effect_1", "music/meet.wav");
 		hp--;
 		if(hp == 0){
 			//game over
@@ -328,6 +412,8 @@ function crashBall(pos_x, pos_y)
 {
 	for(var i = 0 ; i < 3 ; i++){				
 		if(pos_x == ball[i].tile_x*tile_w && pos_y == ball[i].tile_y*tile_w){
+			effect_sound("effect_1", "music/touch.ogg");
+
 			//create ball
 			createBall();
 

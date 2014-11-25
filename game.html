@@ -8,7 +8,11 @@
 	</style>
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script src="proc.js"></script>
+	<script src="sound.js"></script>
 	<script>	
+		var forReady = 0;
+		var gameState = 0;
+
 		var rate=1;
 		var width=720;
 		var height=1280;
@@ -109,37 +113,66 @@
 		var enemyBitmap3 = new Array();
 		var enemyBitmap4 = new Array();
 		var attackBitmap = new Array();
-		var background = new Image();
-		var ballBitmap = new Image();
-		var swordBitmap = new Image();
+		var windBitmap = new Array();
+		var thunderBitmap = new Array();
+
+		var tilteBitmap = new Image();
+		var background = new Image(); // 1
+		background.onload = function(){forReady++;}
+		var ballBitmap = new Image(); // 1
+		ballBitmap.onload = function(){forReady++;}
+		var swordBitmap = new Image(); // 1
+		swordBitmap.onload = function(){forReady++;}
 		
 		
 		//onLoad
-		$(document).ready(function(){			
-			for(i = 0; i < 8 ; i++){
-				characBitmap0[i] = new Image();
-				characBitmap1[i] = new Image();
-				characBitmap2[i] = new Image();
-				characBitmap3[i] = new Image();
-				characBitmap4[i] = new Image();
-			}
-			for(i = 0; i < 2 ; i++){
-				enemyBitmap0[i] = new Image();
-				enemyBitmap1[i] = new Image();
-				enemyBitmap2[i] = new Image();
-				enemyBitmap3[i] = new Image();
-				enemyBitmap4[i] = new Image();
-			}
-			for(i = 0; i < 6 ; i++){
-				tileBitmap[i] = new Image();
-			}
-			for(i = 0; i < 4 ; i++){
-				backBitmap[i] = new Image();
-			}
-			for(i = 0; i < 5 ; i++){
-				attackBitmap[i] = new Image();
-			}
+		$(document).ready(function(){				
 
+			for(i = 0; i < 8 ; i++){ // 8 * 5 = 40
+				characBitmap0[i] = new Image();
+				characBitmap0[i].onload = function(){forReady++;}
+				characBitmap1[i] = new Image();
+				characBitmap1[i].onload = function(){forReady++;}
+				characBitmap2[i] = new Image();
+				characBitmap2[i].onload = function(){forReady++;}
+				characBitmap3[i] = new Image();
+				characBitmap3[i].onload = function(){forReady++;}
+				characBitmap4[i] = new Image();
+				characBitmap4[i].onload = function(){forReady++;}
+			}
+			for(i = 0; i < 2 ; i++){ // 2 * 5 = 10
+				enemyBitmap0[i] = new Image();
+				enemyBitmap0[i].onload = function(){forReady++;}
+				enemyBitmap1[i] = new Image();
+				enemyBitmap1[i].onload = function(){forReady++;}
+				enemyBitmap2[i] = new Image();
+				enemyBitmap2[i].onload = function(){forReady++;}
+				enemyBitmap3[i] = new Image();
+				enemyBitmap3[i].onload = function(){forReady++;}
+				enemyBitmap4[i] = new Image();
+				enemyBitmap4[i].onload = function(){forReady++;}
+			}
+			for(i = 0; i < 8 ; i++){ // 6
+				windBitmap[i] = new Image();
+				windBitmap[i].onload = function(){forReady++;}
+			}
+			for(i = 0; i < 3 ; i++){ // 5
+				thunderBitmap[i] = new Image();
+				thunderBitmap[i].onload = function(){forReady++;}
+			}
+			for(i = 0; i < 6 ; i++){ // 6
+				tileBitmap[i] = new Image();
+				tileBitmap[i].onload = function(){forReady++;}
+			}
+			for(i = 0; i < 4 ; i++){ // 4
+				backBitmap[i] = new Image();
+				backBitmap[i].onload = function(){forReady++;}
+			}
+			for(i = 0; i < 5 ; i++){ // 5
+				attackBitmap[i] = new Image();
+				attackBitmap[i].onload = function(){forReady++;}
+			}
+			tilteBitmap.src="image/ui/open_bg.png"
 			background.src="image/ui/map.png"
 			ballBitmap.src="image/ui/momo_button.png"
 			swordBitmap.src="image/ui/item_sword1.png"
@@ -206,6 +239,19 @@
 			attackBitmap[2].src="image/ui/attack_swing3.png"
 			attackBitmap[3].src="image/ui/attack_swing4.png"
 			attackBitmap[4].src="image/ui/attack_swing5.png"
+
+			windBitmap[0].src="image/ui/smog1.png"
+			windBitmap[1].src="image/ui/smog2.png"
+			windBitmap[2].src="image/ui/smog3.png"
+			windBitmap[3].src="image/ui/smog4.png"
+			windBitmap[4].src="image/ui/smog5.png"
+			windBitmap[5].src="image/ui/smog6.png"
+			windBitmap[6].src="image/ui/smog7.png"
+			windBitmap[7].src="image/ui/smog8.png"
+
+			thunderBitmap[0].src="image/ui/effect_thunder1.png"
+			thunderBitmap[1].src="image/ui/effect_thunder2.png"
+			thunderBitmap[2].src="image/ui/effect_thunder3.png"
 			
 			/*
 			tileBitmap[0].src="image/tile/tile1.png"
@@ -290,5 +336,11 @@
 
  <body>
 	<canvas id="canvas1" width = "1080" height="1920"></canvas>
+	<audio loop="loop" autoplay="autoplay" id="bgm">
+		<source src="music/play1.ogg" type="audio/ogg">
+	</audio>
+	<audio id="effect_1">
+		<source src="music/knife_1.wav" type="audio/wav">
+	</audio>
  </body>
 </html>
